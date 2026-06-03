@@ -64,7 +64,7 @@ def make_test_call(subject: str, question_amount: int):
         "Content-Type": "application/json",
     },
     data=json.dumps({
-        "model": "openai/gpt-oss-120b:free",
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
         "messages": [
             {
             "role": "user",
@@ -80,5 +80,5 @@ def make_test_call(subject: str, question_amount: int):
     questions = json.loads(response['choices'][0]['message']['content'])
     print(questions)
     format_questions(questions)
-    return questions;
+    return questions
 

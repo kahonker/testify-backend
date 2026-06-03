@@ -6,6 +6,6 @@ from app.ai import make_test_call
 def index():
     return "Hello world!"
 
-@app.route('/make_test/<subject>&<question_amount>')
+@app.route('/make_test/<subject>/<question_amount>')
 def make_test(subject: str, question_amount: int):
     return make_test_call(subject, question_amount)
