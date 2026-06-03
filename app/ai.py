@@ -64,7 +64,7 @@ def make_test_call(subject: str, question_amount: int):
         "Content-Type": "application/json",
     },
     data=json.dumps({
-        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "model": "liquid/lfm-2.5-1.2b-instruct:free",
         "messages": [
             {
             "role": "user",
@@ -77,8 +77,8 @@ def make_test_call(subject: str, question_amount: int):
 
     # Extract the assistant message with reasoning_details
     response = response.json()
-    questions = json.loads(response['choices'][0]['message']['content'])
-    print(questions)
+    print(response['choices'][0]['message']['content'][7:-3])
+    questions = json.loads(response['choices'][0]['message']['content'][7:-3])
     format_questions(questions)
     return questions
 
