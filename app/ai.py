@@ -1,5 +1,6 @@
 import requests
 import json
+import re
 from dotenv import load_dotenv
 from os import getenv
 from app.formatting import format_questions
@@ -64,7 +65,7 @@ def make_test_call(subject: str, question_amount: int):
         "Content-Type": "application/json",
     },
     data=json.dumps({
-        "model": "liquid/lfm-2.5-1.2b-instruct:free",
+        "model": "nvidia/nemotron-nano-12b-v2-vl:free",
         "messages": [
             {
             "role": "user",
@@ -77,8 +78,9 @@ def make_test_call(subject: str, question_amount: int):
 
     # Extract the assistant message with reasoning_details
     response = response.json()
-    print(response['choices'][0]['message']['content'][7:-3])
-    questions = json.loads(response['choices'][0]['message']['content'][7:-3])
+    print(response['choices'][0]['message']['content'])
+    questions = re.search(r"(\[[\s\S]+\])", response['choices'][0]['message']['content'])
+    questions = json.loads(questions.group(0))
     format_questions(questions)
     return questions
 
