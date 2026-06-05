@@ -65,7 +65,7 @@ def make_test_call(subject: str, question_amount: int):
         "Content-Type": "application/json",
     },
     data=json.dumps({
-        "model": "nvidia/nemotron-nano-12b-v2-vl:free",
+        "model": "openai/gpt-oss-20b:free",
         "messages": [
             {
             "role": "user",
@@ -78,7 +78,7 @@ def make_test_call(subject: str, question_amount: int):
 
     # Extract the assistant message with reasoning_details
     response = response.json()
-    print(response['choices'][0]['message']['content'])
+    print(response)
     questions = re.search(r"(\[[\s\S]+\])", response['choices'][0]['message']['content'])
     questions = json.loads(questions.group(0))
     format_questions(questions)
