@@ -6,3 +6,5 @@ def format_questions(questions):
         shuffle(question.get("answers"))
         question["correct"] = question.get("answers").index(correct)
         question["answered"] = -1
+
+

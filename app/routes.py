@@ -7,5 +7,5 @@ def index():
     return "Hello world!"
 
 @app.route('/make_test/<subject>/<question_amount>')
-def make_test(subject: str, question_amount: int):
-    return make_test_call(subject, question_amount)
+async def make_test(subject: str, question_amount: int):
+    return await make_test_call(subject, int(question_amount))

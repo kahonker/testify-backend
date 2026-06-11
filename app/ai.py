@@ -1,9 +1,12 @@
 import requests
 import json
 import re
+import random
 from dotenv import load_dotenv
 from os import getenv
 from app.formatting import format_questions
+import asyncio
+import httpx
 
 load_dotenv()
 OPENROUTER_API_KEY = getenv('OPENROUTER_API_KEY')
@@ -57,30 +60,76 @@ IMPORTANT:
 
 """
 
-def make_test_call(subject: str, question_amount: int):
-    response = requests.post(
+prompt = """Generate a {x}-question multiple choice test for {subject} as a JSON array. Each object must have:"question" (string), "answers" (4 strings, first is correct), "explanation" (string). Use <code> and <pre> for code. Properly escape backslashes for string to json parsing Example:
+[{{"question": "What is 2+2?", "answers": ["4", "5", "3", "2"], "explanation": "2+2=4"}}]"""
+
+async def make_test_call(subject: str, question_amount: int):
+    response = await make_test_calls(
     url="https://openrouter.ai/api/v1/chat/completions",
     headers={
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
     },
-    data=json.dumps({
-        "model": "openai/gpt-oss-20b:free",
+    subject=subject,
+    question_amount=question_amount)
+    # data=json.dumps({
+    #     "model": "openai/gpt-oss-20b:free",
+    #     "messages": [
+    #         {
+    #         "role": "user",
+    #         "content": f"Read this prompt {base_input}. Here is the subject: {subject} and question amount: {question_amount}"
+    #         }
+    #     ],
+    #     "reasoning": {"enabled": True},
+    #     "response_format": { "type": "json_object" },
+    #     "temperature": 0.8,
+    #     "top_p": 0.9,
+    #     "top_k": 45,
+    #     "frequency_penalty": 0.2,
+    #     "presence_penalty": 0.2
+    # })
+    # )
+
+    # Extract the assistant message with reasoning_details
+    # response = response.json()
+    # print(response)
+    # questions = re.search(r"(\[[\s\S]+\])", response['choices'][0]['message']['content'])
+    # questions = json.loads(questions.group(0))
+    # format_questions(questions)
+    response = format_questions(response)
+    return response
+
+async def make_test_calls(url, headers, subject, question_amount):
+    data_list = []
+    for i in range(int(question_amount/5)):
+        data_list.append({
+        "model": "google/gemini-2.5-flash-lite",
         "messages": [
             {
             "role": "user",
-            "content": f"Read this prompt {base_input}. Here is the subject: {subject} and question amount: {question_amount}"
+            "content": prompt.format(x = 5, subject=subject)
             }
         ],
-        "reasoning": {"enabled": True}
+        "response_format": { "type": "json_object" },
+        "temperature": 0.8,
+        "top_p": 0.9,
+        "top_k": 45,
+        "frequency_penalty": 0.2,
+        "presence_penalty": 0.2,
     })
-    )
 
-    # Extract the assistant message with reasoning_details
-    response = response.json()
-    print(response)
-    questions = re.search(r"(\[[\s\S]+\])", response['choices'][0]['message']['content'])
-    questions = json.loads(questions.group(0))
-    format_questions(questions)
-    return questions
+    response_list = []
+    async with httpx.AsyncClient() as client:
+        tasks = [await client.post(url, headers=headers, data=json.dumps(data)) for data in data_list]
+    
+    for task in tasks:
+        try:
+            questions = task.json()['choices'][0]['message']['content']
+            questions = json.loads(questions)
+            response_list = response_list + questions
+        except Exception as e:
+            print(questions)
+            continue
+
+    return response_list
 
