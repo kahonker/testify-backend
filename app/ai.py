@@ -60,7 +60,7 @@ IMPORTANT:
 
 """
 
-prompt = """Generate a {x}-question multiple choice test for {subject} as a JSON array. Each object must have:"question" (string), "answers" (4 strings, first is correct), "explanation" (string). Use <code> and <pre> for code. Properly escape backslashes for string to json parsing Example:
+prompt = """Generate a {x}-question multiple choice test for {subject} as a JSON array. Each object must have:"question" (string), "answers" (4 strings, first is correct), "explanation" (string). Use <code> and <pre> for code. Example:
 [{{"question": "What is 2+2?", "answers": ["4", "5", "3", "2"], "explanation": "2+2=4"}}]"""
 
 async def make_test_call(subject: str, question_amount: int):
